@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Typing Test</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        text-align: center;
+        background: #f4f4f4;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      /* Background video */
+      #background-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+        margin-top: 90px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        position: relative;
+      }
+
+      .stats,
+      .result {
+        margin-bottom: 15px;
+      }
+
+      #word {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+
+      #feedback {
+        margin-top: 10px;
+      }
+
+      #feedback img {
+        width: 30px;
+        height: 30px;
+      }
+
+      textarea {
+        width: 80%;
+        height: 40px;
+        padding: 10px;
+        font-size: 16px;
+        margin: 10px auto;
+        display: block;
+      }
+
+      button {
+        margin: 10px;
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background: #59afd7;
+        color: rgb(20, 17, 17);
+      }
+
+      button:hover {
+        background: #aedcd3;
+      }
+
+      /* Make the layout responsive */
+      @media (max-width: 768px) {
+        .container {
+          width: 90%;
+        }
+        #word {
+          font-size: 20px;
+        }
+        textarea {
+          width: 90%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          width: 95%;
+        }
+        #word {
+          font-size: 18px;
+        }
+        textarea {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background video -->
+    <video id="background-video" autoplay loop muted>
+      <source src="7529-201118756_small.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="container">
+      <div class="stats">
+        <p id="level">Level: 1</p>
+        <p>Time: <span id="timer">0s</span></p>
+        <p>Mistakes: <span id="mistakes">0</span></p>
+      </div>
+      <div id="word" onmousedown="return false" onselectstart="return false"></div>
+      <div id="feedback"></div> <!-- This will show feedback images -->
+      <textarea rows="2" cols="30" id="word-input" placeholder="Type the word here.."></textarea>
+      <button id="start-test" onclick="startTest()">Start Test</button>
+      <button id="stop-test" onclick="displayResult()">Stop Test</button>
+      <div class="result">
+        <h3>Result</h3>
+        <div class="wrapper">
+          <p>Accuracy: <span id="accuracy"></span></p>
+          <p>Speed: <span id="wpm"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Words grouped by difficulty levels
+      const levelWords = [
+        ["apple", "banana", "cherry", "grape", "mango"], // Level 1 (easy)
+        ["fusion", "guitar", "rocket", "python", "jungle"], // Level 2
+        ["keyboard", "capture", "breeze", "guitar", "rhythm"], // Level 3
+        ["counterproductive", "phenomenon", "vicariously", "subterranean", "antidisestablishmentarianism"], // Level 4
+        ["uncharacteristically", "misinterpretation", "infrastructure", "misunderstood", "psychopathology"] // Level 5 (hard)
+      ];
+
+      let timer, time = 0, mistakes = 0, wordToType = "", wordIndex = 0, wordCount = 0, level = 0, started = false;
+
+      // Load sounds
+      const correctSound = new Audio('short-success-sound-glockenspiel-treasure-video-game-6346.mp3'); 
+      const incorrectSound = new Audio('080047_lose_funny_retro_video-game-80925.mp3'); 
+
+      function startTest() {
+        if (started) return;
+        started = true;
+        mistakes = 0;
+        time = 0;
+        wordIndex = 0;
+        wordCount = 0;
+        level = 0;
+        document.getElementById("mistakes").textContent = mistakes;
+        document.getElementById("timer").textContent = "0s";
+        document.getElementById("accuracy").textContent = "";
+        document.getElementById("wpm").textContent = "";
+        document.getElementById("word-input").value = "";
+        document.getElementById("level").textContent = `Level: ${level + 1}`; // Show level
+
+        nextWord();
+
+        timer = setInterval(() => {
+          time++;
+          document.getElementById("timer").textContent = time + "s";
+        }, 1000);
+      }
+      function nextWord() {
+    if (wordIndex >= levelWords[level].length) {
+        if (wordCount >= 5) {
+            if (level < 4) {
+                level++; 
+                document.getElementById("level").textContent = `Level: ${level + 1}`; 
+                wordIndex = 0; 
+                wordCount = 0; 
+                nextWord(); 
+            } else {
+                displayResult(); 
+            }
+        } else {
+            nextWord(); 
+        }
+        return;
+    }
+
+    wordToType = levelWords[level][wordIndex];
+    document.getElementById("word").textContent = wordToType;
+    document.getElementById("word-input").value = ""; 
+    document.getElementById("feedback").innerHTML = ""; 
+    wordIndex++;
+}
+
+      document.getElementById("word-input").addEventListener("input", function () {
+        let typedText = this.value;
+
+        if (typedText.length > 0 && typedText[typedText.length - 1] !== wordToType[typedText.length - 1]) {
+          this.value = ''; 
+          document.getElementById("feedback").innerHTML = '<img src="wr.png" alt="Wrong" class="feedback-img" />'; 
+          incorrectSound.play(); 
+          document.getElementById("word").textContent = wordToType;
+          return;
+        }
+
+        if (typedText === wordToType) {
+          correctSound.play();
+          wordCount++;
+          document.getElementById("feedback").innerHTML = '<img src="th.jpeg" alt="Correct" class="feedback-img" />';
+          setTimeout(nextWord, 500); 
+        }
+      });
+
+      function displayResult() {
+        if (!started) return;
+        clearInterval(timer);
+        started = false;
+        let accuracy = ((wordCount * 5 - mistakes) / (wordCount * 5)) * 100;
+        let wpm = (wordCount / (time / 60));
+        document.getElementById("accuracy").textContent = accuracy.toFixed(2);
+        document.getElementById("wpm").textContent = wpm.toFixed(2) ;
+      }
+    </script>
+  </body>
+</html> 
