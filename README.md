@@ -19,4 +19,3 @@ Click Stop Test anytime to see your results.
 
 🚀 Technologies Used
 HTML, CSS, JavaScript for the game logic 
-Google Fonts (Poppins) for a clean design
